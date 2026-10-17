@@ -1,0 +1,79 @@
+name: Bug report
+description: Something in one of the Odin's mods doesn't work as it should.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time. The log file is the most useful thing you can attach.
+  - type: dropdown
+    id: mod
+    attributes:
+      label: Which mod?
+      options:
+        - Odin's Free Refills
+        - Odin's Wanted Posters
+        - Odin's Almanac
+        - Odin's Saga
+        - Odin's Hearth
+        - Odin's Pantry
+        - Odin's Raven Returns
+        - Odin's Drunk Cam
+        - Odin's Weapon Memories
+        - Odin's Stone Whispers
+        - Odin's Dusk Horn
+        - Odin's Knot
+        - Not sure / several
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Mod version
+      description: Shown next to the mod's name in your mod manager.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we make it happen again?
+      placeholder: |
+        1. Log in near a troll
+        2. Press K
+        3. ...
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where do you play?
+      options:
+        - Single-player
+        - Dedicated server
+        - Hosted by me or a friend
+    validations:
+      required: true
+  - type: textarea
+    id: other-mods
+    attributes:
+      label: Other mods
+      description: A list of your other mods, or your mod manager's profile code (Settings, then Export profile as code).
+  - type: textarea
+    id: log
+    attributes:
+      label: Log file
+      description: Drag in BepInEx\LogOutput.log from your profile folder (in the mod manager, Settings, then Browse profile folder).
+    validations:
+      required: false

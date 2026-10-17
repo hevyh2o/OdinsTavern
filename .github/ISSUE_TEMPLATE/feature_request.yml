@@ -1,0 +1,37 @@
+name: Idea
+description: A feature for one of the mods, or a whole new mod for Odin to narrate.
+title: "[Idea] "
+labels: ["idea"]
+body:
+  - type: dropdown
+    id: mod
+    attributes:
+      label: Which mod?
+      options:
+        - Odin's Free Refills
+        - Odin's Wanted Posters
+        - Odin's Almanac
+        - Odin's Saga
+        - Odin's Hearth
+        - Odin's Pantry
+        - Odin's Raven Returns
+        - Odin's Drunk Cam
+        - Odin's Weapon Memories
+        - Odin's Stone Whispers
+        - Odin's Dusk Horn
+        - Odin's Knot
+        - New mod idea
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should happen in game? Plain words are fine.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: What would it help with, or what's annoying without it?

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and chat
+    url: https://github.com/hevyh2o/OdinsTavern/discussions
+    about: Ask a question, share a tip or just talk. Bugs and ideas go in the forms above.
