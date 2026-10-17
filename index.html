@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="hlidskjalf-build" content="2026-10-17T06:35:53+00:00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1b130c">
+<title>Odin's Hlidskjalf · BeardedGiants watch</title>
+<style>
+:root{--bg:#17110b;--panel:#241a10;--panel2:#2e2215;--line:#4a3722;--gold:#e0b04a;--gold2:#f3d27a;--ink:#f1e6cf;--mute:#b39e7c;--ok:#7fbf6a;--warn:#e08a3c;--bad:#d4553a;--ice:#7fb7d9;--like:#e46b8c;--tav:#c99bff;--disc:#8b9dff;
+--radius:14px;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{background:radial-gradient(1200px 500px at 50% -200px,#3a2814 0%,transparent 70%),repeating-linear-gradient(90deg,#17110b 0 46px,#1a130c 46px 48px);min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) 40px env(safe-area-inset-left)}
+a{color:var(--gold2)}
+header{padding:18px 18px 8px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;border-bottom:2px solid var(--line);background:linear-gradient(#2a1d10,#1d150d)}
+header h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(20px,4vw,30px);letter-spacing:.5px;color:var(--gold2);text-shadow:0 2px 0 #000}
+header h1 .rune{color:var(--gold);opacity:.85;margin-right:6px}
+header .sub{color:var(--mute);font-size:13px;flex-basis:100%;margin-top:-6px}
+.controls{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+button{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--gold)}
+button.primary{background:linear-gradient(#a8771f,#7a5414);border-color:#c89b3c;color:#fff7e0;font-weight:600}
+button.primary.pulse{animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(224,176,74,.6)}50%{box-shadow:0 0 0 8px rgba(224,176,74,0)}}
+.statusbar{display:flex;flex-wrap:wrap;gap:6px 14px;padding:8px 18px;font-size:12.5px;color:var(--mute);border-bottom:1px solid var(--line)}
+.pill{display:inline-flex;align-items:center;gap:5px}
+.dot{width:8px;height:8px;border-radius:50%;background:#666;display:inline-block}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+main{padding:14px;display:grid;gap:14px;max-width:1400px;margin:0 auto}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,220,150,.08)}
+.kpi .lbl{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.8px}
+.kpi .val{font-size:clamp(22px,3.4vw,30px);font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums;color:var(--gold2)}
+.kpi .hint{font-size:12px;color:var(--mute);margin-top:2px;min-height:15px}
+.kpi.big{grid-column:span 2}
+.kpi.big .val{font-size:clamp(30px,5vw,44px)}
+.flash{animation:flash 2.2s ease-out 3}
+.flash.dl{--fc:224,176,74}.flash.like{--fc:228,107,140}.flash.tav{--fc:201,155,255}.flash.disc{--fc:139,157,255}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(var(--fc),.9),inset 0 0 40px rgba(var(--fc),.55);border-color:rgb(var(--fc))}100%{box-shadow:0 0 0 14px rgba(var(--fc),0),inset 0 0 0 rgba(var(--fc),0)}}
+.delta{display:inline-block;font-size:13px;margin-left:6px;color:var(--ok);font-weight:600}
+h2{font-family:Georgia,serif;color:var(--gold);font-size:18px;margin:0 0 10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h2 small{font-family:"Segoe UI",system-ui,sans-serif;font-size:12px;color:var(--mute);font-weight:400}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:2fr 1fr;gap:14px}
+@media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr}.kpi.big{grid-column:span 2}}
+@media(max-width:420px){.kpis{grid-template-columns:1fr 1fr}main{padding:10px}.card{padding:10px}}
+svg text{fill:var(--mute);font-size:11px}
+.chart{width:100%;height:auto;display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:4px}
+.tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;border-bottom:1px solid #3a2b1a;text-align:right;white-space:nowrap}
+th{color:var(--mute);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;user-select:none}
+td:first-child,th:first-child{text-align:left;position:sticky;left:0;background:var(--panel)}
+tr.flashrow td{animation:rowflash 2s ease-out 2}
+@keyframes rowflash{0%{background:rgba(224,176,74,.35)}100%{background:transparent}}
+.modname{display:flex;align-items:center;gap:8px}
+.modname img{width:26px;height:26px;border-radius:6px;border:1px solid var(--line)}
+.up{color:var(--ok)}.down{color:var(--warn)}.flat{color:var(--mute)}.new{color:var(--ice)}
+.bar{height:16px;background:#3a2b1a;border-radius:8px;overflow:hidden;position:relative}
+.bar>span{display:block;height:100%;background:linear-gradient(90deg,#9a6c1a,var(--gold2))}
+.share-row{display:grid;grid-template-columns:minmax(90px,150px) 1fr 60px;gap:8px;align-items:center;font-size:13px;margin:5px 0}
+.share-row .n{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.share-row .p{text-align:right;color:var(--mute);font-variant-numeric:tabular-nums}
+.feed{max-height:420px;overflow-y:auto;font-size:13.5px}
+.ev{display:grid;grid-template-columns:28px 1fr;gap:8px;padding:7px 2px;border-bottom:1px solid #3a2b1a}
+.ev .ic{font-size:18px;text-align:center}
+.ev .tm{color:var(--mute);font-size:11.5px}
+.ev.fresh{background:rgba(224,176,74,.10)}
+.proj{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.proj .card{background:linear-gradient(180deg,#2a2016,#221910)}
+.proj .v{font-size:20px;font-weight:700;color:var(--gold2);margin-top:3px}
+.proj .s{font-size:12px;color:var(--mute);margin-top:3px}
+.note{font-size:12.5px;color:var(--mute);line-height:1.45;margin-top:8px}
+.estimate{display:inline-block;font-size:10.5px;border:1px solid var(--warn);color:var(--warn);border-radius:6px;padding:1px 5px;margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.6px}
+#toasts{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:50;max-width:min(380px,calc(100vw - 28px))}
+.toast{background:#2b1f12;border:1px solid var(--gold);border-left:6px solid var(--gold);border-radius:12px;padding:10px 14px;box-shadow:0 8px 30px rgba(0,0,0,.6);font-size:14px;animation:slidein .35s ease-out}
+.toast.like{border-color:var(--like)}.toast.tav{border-color:var(--tav)}.toast.disc{border-color:var(--disc)}
+@keyframes slidein{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.timeline{font-size:13px;max-height:320px;overflow-y:auto}
+.timeline div{padding:4px 0;border-bottom:1px dashed #3a2b1a}
+.timeline b{color:var(--gold2)}
+footer{max-width:1400px;margin:0 auto;padding:0 18px;color:var(--mute);font-size:12px;line-height:1.5}
+.tavrow{display:flex;gap:16px;flex-wrap:wrap;font-size:13.5px}
+.tavrow span b{color:var(--gold2);font-size:16px}
+</style>
+</head>
+<body>
+<header>
+  <h1><svg class="rune" width="30" height="30" viewBox="0 0 100 100" aria-hidden="true" style="vertical-align:-5px"><g fill="none" stroke="#e0b04a" stroke-width="7" stroke-linejoin="round"><path d="M50 8 L80 60 L20 60 Z"/><path d="M30 30 L60 82 L0 82 Z" transform="translate(10,0)"/><path d="M70 30 L100 82 L40 82 Z" transform="translate(-10,0)"/></g></svg> Odin's Hlidskjalf</h1>
+  <div class="controls">
+    <button id="btnSound" class="primary pulse" title="Browsers block sound until you click once">🔈 Enable sound</button>
+    <button id="btnMute" title="Mute / unmute alerts">🔔 Alerts on</button>
+    <button id="btnTest" title="Play each alert sound">🎵 Test sounds</button>
+    <button id="btnRefresh" title="Poll Thunderstore and Discord now">⟳ Refresh</button>
+  </div>
+  <div class="sub">From the high seat, the ravens watch BeardedGiants' Valheim mods, the Odin's Tavern hall and the Discord. Live from public APIs.</div>
+</header>
+<div class="statusbar" id="statusbar"></div>
+<main>
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid3">
+    <div class="card">
+      <h2>Total downloads over time <small id="histNote"></small></h2>
+      <div id="chartTotal"></div>
+      <div class="legend"><span><i style="background:var(--gold2)"></i>Observed (watch snapshots)</span><span><i style="background:repeating-linear-gradient(90deg,var(--gold) 0 4px,transparent 4px 7px)"></i>Reconstructed from version releases (estimate)</span><span><i style="background:var(--ice);height:8px;width:3px"></i>Release</span></div>
+    </div>
+    <div class="card">
+      <h2>Share of total</h2>
+      <div id="share"></div>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <div class="card"><h2>Downloads per hour <small>last 48 h, CDT</small></h2><div id="chartHourly"></div><div class="legend"><span><i style="background:var(--gold2);height:8px"></i>Observed</span><span><i style="background:#8a6a35;height:8px"></i>Estimated</span></div></div>
+    <div class="card"><h2>Downloads per day <small>CDT days</small></h2><div id="chartDaily"></div><div class="legend"><span><i style="background:var(--gold2);height:8px"></i>Mostly observed</span><span><i style="background:#8a6a35;height:8px"></i>Estimated</span></div></div>
+  </section>
+
+  <section class="card">
+    <h2>Projections <span class="estimate">estimates</span> <small id="projBasis"></small></h2>
+    <div class="proj" id="proj"></div>
+    <div class="note" id="projNote"></div>
+  </section>
+
+  <section class="card">
+    <h2>The mods <small>tap a header to sort</small></h2>
+    <div class="tablewrap"><table id="modTable"></table></div>
+    <div class="note">“24 h” is downloads in the last 24 hours (observed snapshots where available, otherwise reconstructed). Trend compares the last 24 h with the 24 h before. “New” means the mod is under 48 h old. Next ETA is when the mod should reach its next round number at its 24 h pace (an estimate).</div>
+  </section>
+
+  <section class="grid2">
+    <div class="card">
+      <h2>🍺 Odin's Tavern <small><a href="https://github.com/hevyh2o/OdinsTavern" target="_blank" rel="noopener">github.com/hevyh2o/OdinsTavern</a></small></h2>
+      <div class="tavrow" id="tavern"></div>
+      <div id="chartTavern" style="margin-top:10px"></div>
+      <div class="note" id="tavNote"></div>
+    </div>
+    <div class="card">
+      <h2>Raven reports <small>event feed</small></h2>
+      <div class="feed" id="feed"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Release timeline <small>every version on Thunderstore</small></h2>
+    <div class="timeline" id="timeline"></div>
+  </section>
+</main>
+<footer id="footer"></footer>
+<div id="toasts"></div>
+
+<script>
+window.ODIN_DATA = {"built_at":"2026-10-17T06:35:53+00:00","checked_at":"2026-10-17T06:35:01+00:00","schedule":{"interval_min":5,"github_every_min":15,"level":0},"packages":[{"name":"Odins_Almanac","uuid":"4702e4cd-9f81-434e-96ff-7c702ecad237","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Almanac-0.1.5.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Almanac/","created":"2026-10-14T06:44:08.174124Z","versions":[{"v":"0.1.5","created":"2026-10-17T05:27:40.097234Z","dl":1},{"v":"0.1.4","created":"2026-10-15T02:17:07.489566Z","dl":31},{"v":"0.1.3","created":"2026-10-14T18:24:03.675108Z","dl":12},{"v":"0.1.2","created":"2026-10-14T08:21:32.120286Z","dl":13},{"v":"0.1.1","created":"2026-10-14T08:07:17.935795Z","dl":3},{"v":"0.1.0","created":"2026-10-14T06:44:11.502475Z","dl":17}],"downloads":77,"likes":0,"latest":"0.1.5","deprecated":false},{"name":"Odins_Drunk_Cam","uuid":"98a23d54-0990-4f23-be9f-b504993d4ece","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Drunk_Cam-0.1.2.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Drunk_Cam/","created":"2026-10-14T18:19:06.297822Z","versions":[{"v":"0.1.2","created":"2026-10-17T05:28:34.165759Z","dl":1},{"v":"0.1.1","created":"2026-10-15T02:18:10.509360Z","dl":19},{"v":"0.1.0","created":"2026-10-14T18:19:11.872687Z","dl":11}],"downloads":31,"likes":0,"latest":"0.1.2","deprecated":false},{"name":"Odins_Dusk_Horn","uuid":"35a3d639-2041-4efc-ae25-40e36214e291","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Dusk_Horn-0.1.1.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Dusk_Horn/","created":"2026-10-17T03:45:13.390775Z","versions":[{"v":"0.1.1","created":"2026-10-17T05:29:04.260835Z","dl":2},{"v":"0.1.0","created":"2026-10-17T03:45:16.313356Z","dl":7}],"downloads":9,"likes":0,"latest":"0.1.1","deprecated":false},{"name":"Odins_Free_Refills","uuid":"643e9f35-e0af-4a30-b298-1c140bb3ff29","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Free_Refills-1.0.9.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Free_Refills/","created":"2026-10-13T06:52:17.085008Z","versions":[{"v":"1.0.9","created":"2026-10-17T05:27:19.311029Z","dl":8},{"v":"1.0.8","created":"2026-10-15T02:16:27.658800Z","dl":160},{"v":"1.0.7","created":"2026-10-14T18:24:17.091844Z","dl":65},{"v":"1.0.6","created":"2026-10-14T08:21:43.002349Z","dl":69},{"v":"1.0.5","created":"2026-10-14T08:07:33.336533Z","dl":9},{"v":"1.0.4","created":"2026-10-14T06:46:47.338419Z","dl":29},{"v":"1.0.3","created":"2026-10-14T06:06:22.118906Z","dl":15},{"v":"1.0.2","created":"2026-10-14T04:06:17.095642Z","dl":24},{"v":"1.0.1","created":"2026-10-14T03:50:27.869528Z","dl":14},{"v":"1.0.0","created":"2026-10-13T06:52:19.933897Z","dl":101}],"downloads":494,"likes":0,"latest":"1.0.9","deprecated":false},{"name":"Odins_Hearth","uuid":"3e26b39c-a8a1-4098-877c-6d46a38dd3cf","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Hearth-0.1.4.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Hearth/","created":"2026-10-14T08:20:56.864712Z","versions":[{"v":"0.1.4","created":"2026-10-17T05:28:01.623947Z","dl":4},{"v":"0.1.3","created":"2026-10-15T05:08:00.384256Z","dl":49},{"v":"0.1.2","created":"2026-10-15T02:17:32.399513Z","dl":17},{"v":"0.1.1","created":"2026-10-14T18:24:57.751163Z","dl":16},{"v":"0.1.0","created":"2026-10-14T08:21:00.048237Z","dl":19}],"downloads":105,"likes":0,"latest":"0.1.4","deprecated":false},{"name":"Odins_Knot","uuid":"b25ff49d-c0c4-4668-a0a9-18c109b6727d","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Knot-0.1.1.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Knot/","created":"2026-10-17T04:59:56.764586Z","versions":[{"v":"0.1.1","created":"2026-10-17T05:29:13.666402Z","dl":2},{"v":"0.1.0","created":"2026-10-17T04:59:59.733265Z","dl":5}],"downloads":7,"likes":0,"latest":"0.1.1","deprecated":false},{"name":"Odins_Pantry","uuid":"7b24ae8a-8398-4b8d-883d-7cbab9a4ce51","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Pantry-0.1.3.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Pantry/","created":"2026-10-14T08:21:08.341034Z","versions":[{"v":"0.1.3","created":"2026-10-17T05:28:13.480380Z","dl":2},{"v":"0.1.2","created":"2026-10-15T02:17:45.026467Z","dl":27},{"v":"0.1.1","created":"2026-10-14T18:25:08.644931Z","dl":13},{"v":"0.1.0","created":"2026-10-14T08:21:11.417225Z","dl":13}],"downloads":55,"likes":0,"latest":"0.1.3","deprecated":false},{"name":"Odins_Raven_Returns","uuid":"95bb0499-10fb-4ce0-a0e4-7367c6a6dd6d","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Raven_Returns-0.1.4.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Raven_Returns/","created":"2026-10-14T08:21:18.944246Z","versions":[{"v":"0.1.4","created":"2026-10-17T05:28:23.934919Z","dl":2},{"v":"0.1.3","created":"2026-10-15T02:17:57.950836Z","dl":27},{"v":"0.1.2","created":"2026-10-14T22:48:26.660256Z","dl":18},{"v":"0.1.1","created":"2026-10-14T18:25:20.594615Z","dl":15},{"v":"0.1.0","created":"2026-10-14T08:21:21.451213Z","dl":14}],"downloads":76,"likes":0,"latest":"0.1.4","deprecated":false},{"name":"Odins_Saga","uuid":"15ea8fd4-6bc2-401a-8e38-28fa5775dd70","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Saga-0.1.3.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Saga/","created":"2026-10-14T08:20:45.023622Z","versions":[{"v":"0.1.3","created":"2026-10-17T05:27:50.721736Z","dl":1},{"v":"0.1.2","created":"2026-10-15T02:17:19.621025Z","dl":30},{"v":"0.1.1","created":"2026-10-14T18:24:40.736670Z","dl":15},{"v":"0.1.0","created":"2026-10-14T08:20:47.644559Z","dl":14}],"downloads":60,"likes":0,"latest":"0.1.3","deprecated":false},{"name":"Odins_Stone_Whispers","uuid":"d5319c00-38d7-424a-b87f-c5d2ac57c594","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Stone_Whispers-0.1.1.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Stone_Whispers/","created":"2026-10-15T07:04:59.003927Z","versions":[{"v":"0.1.1","created":"2026-10-17T05:28:54.551505Z","dl":2},{"v":"0.1.0","created":"2026-10-15T07:05:03.084468Z","dl":19}],"downloads":21,"likes":0,"latest":"0.1.1","deprecated":false},{"name":"Odins_Wanted_Posters","uuid":"6bd948a2-7a61-4a2d-bfbb-7822c64b3e9c","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Wanted_Posters-0.2.7.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Wanted_Posters/","created":"2026-10-14T05:59:34.323260Z","versions":[{"v":"0.2.7","created":"2026-10-17T05:27:29.391202Z","dl":5},{"v":"0.2.6","created":"2026-10-15T02:16:55.057917Z","dl":37},{"v":"0.2.5","created":"2026-10-14T18:24:28.416232Z","dl":21},{"v":"0.2.4","created":"2026-10-14T08:21:52.597406Z","dl":30},{"v":"0.2.3","created":"2026-10-14T08:07:46.209142Z","dl":6},{"v":"0.2.2","created":"2026-10-14T06:47:14.797575Z","dl":11},{"v":"0.2.1","created":"2026-10-14T06:23:48.742175Z","dl":9},{"v":"0.2.0","created":"2026-10-14T05:59:37.534781Z","dl":10}],"downloads":129,"likes":0,"latest":"0.2.7","deprecated":false},{"name":"Odins_Weapon_Memories","uuid":"26d5858f-e05d-4b95-90d5-479333d348c8","icon":"https://ccdn.thunderstore.io/live/repository/icons/BeardedGiants-Odins_Weapon_Memories-0.1.2.png","url":"https://thunderstore.io/c/valheim/p/BeardedGiants/Odins_Weapon_Memories/","created":"2026-10-15T02:13:48.571622Z","versions":[{"v":"0.1.2","created":"2026-10-17T05:28:44.069543Z","dl":4},{"v":"0.1.1","created":"2026-10-15T03:36:16.150507Z","dl":32},{"v":"0.1.0","created":"2026-10-15T02:13:51.107169Z","dl":11}],"downloads":47,"likes":0,"latest":"0.1.2","deprecated":false}],"snapshots":[{"t":"2026-10-17T05:44:11+00:00","src":"backfill","dl":1066,"lk":0,"pk":{"Odins_Almanac":76,"Odins_Drunk_Cam":30,"Odins_Dusk_Horn":7,"Odins_Free_Refills":475,"Odins_Hearth":102,"Odins_Knot":3,"Odins_Pantry":53,"Odins_Raven_Returns":74,"Odins_Saga":59,"Odins_Stone_Whispers":20,"Odins_Wanted_Posters":124,"Odins_Weapon_Memories":43},"pl":{},"folk":0,"dm":null,"do":null},{"t":"2026-10-17T05:54:04+00:00","src":"backfill","dl":1095,"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":490,"Odins_Hearth":104,"Odins_Knot":4,"Odins_Pantry":54,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":44},"pl":{},"folk":0,"dm":null,"do":0},{"t":"2026-10-17T06:00:01+00:00","src":"backfill","dl":1098,"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":491,"Odins_Hearth":104,"Odins_Knot":5,"Odins_Pantry":54,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":45},"pl":{},"folk":0,"dm":null,"do":0},{"t":"2026-10-17T06:01:30+00:00","src":"backfill","dl":1099,"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":491,"Odins_Hearth":104,"Odins_Knot":5,"Odins_Pantry":54,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":46},"pl":{},"folk":0,"dm":1,"do":0},{"t":"2026-10-17T06:05:01+00:00","src":"backfill","dl":1100,"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":491,"Odins_Hearth":104,"Odins_Knot":5,"Odins_Pantry":55,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":46},"pl":{},"folk":0,"dm":1,"do":0},{"dl":1100,"dm":1,"do":0,"folk":0,"gh":{"checked":false,"comments":0,"discussion_comments":0,"discussions":0,"forks":0,"issues":0,"prs":0,"stars":0,"watchers":0},"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":491,"Odins_Hearth":104,"Odins_Knot":5,"Odins_Pantry":55,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":46},"pl":{},"pv":{"Odins_Almanac":"0.1.5","Odins_Drunk_Cam":"0.1.2","Odins_Dusk_Horn":"0.1.1","Odins_Free_Refills":"1.0.9","Odins_Hearth":"0.1.4","Odins_Knot":"0.1.1","Odins_Pantry":"0.1.3","Odins_Raven_Returns":"0.1.4","Odins_Saga":"0.1.3","Odins_Stone_Whispers":"0.1.1","Odins_Wanted_Posters":"0.2.7","Odins_Weapon_Memories":"0.1.2"},"src":"monitor","t":"2026-10-17T06:10:01+00:00","ts_err":false},{"dl":1100,"dm":1,"do":0,"folk":0,"gh":{"checked":true,"comments":0,"discussion_comments":0,"discussions":0,"forks":0,"issues":0,"prs":0,"stars":0,"watchers":0},"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":491,"Odins_Hearth":104,"Odins_Knot":5,"Odins_Pantry":55,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":46},"pl":{},"pv":{"Odins_Almanac":"0.1.5","Odins_Drunk_Cam":"0.1.2","Odins_Dusk_Horn":"0.1.1","Odins_Free_Refills":"1.0.9","Odins_Hearth":"0.1.4","Odins_Knot":"0.1.1","Odins_Pantry":"0.1.3","Odins_Raven_Returns":"0.1.4","Odins_Saga":"0.1.3","Odins_Stone_Whispers":"0.1.1","Odins_Wanted_Posters":"0.2.7","Odins_Weapon_Memories":"0.1.2"},"src":"monitor","t":"2026-10-17T06:15:01+00:00","ts_err":false},{"dl":1101,"dm":1,"do":0,"folk":0,"gh":{"checked":false,"comments":0,"discussion_comments":0,"discussions":0,"forks":0,"issues":0,"prs":0,"stars":0,"watchers":0},"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":491,"Odins_Hearth":105,"Odins_Knot":5,"Odins_Pantry":55,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":127,"Odins_Weapon_Memories":46},"pl":{},"pv":{"Odins_Almanac":"0.1.5","Odins_Drunk_Cam":"0.1.2","Odins_Dusk_Horn":"0.1.1","Odins_Free_Refills":"1.0.9","Odins_Hearth":"0.1.4","Odins_Knot":"0.1.1","Odins_Pantry":"0.1.3","Odins_Raven_Returns":"0.1.4","Odins_Saga":"0.1.3","Odins_Stone_Whispers":"0.1.1","Odins_Wanted_Posters":"0.2.7","Odins_Weapon_Memories":"0.1.2"},"src":"monitor","t":"2026-10-17T06:20:02+00:00","ts_err":false},{"dl":1103,"dm":1,"do":0,"folk":0,"gh":{"checked":false,"comments":0,"discussion_comments":0,"discussions":0,"forks":0,"issues":0,"prs":0,"stars":0,"watchers":0},"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":8,"Odins_Free_Refills":492,"Odins_Hearth":105,"Odins_Knot":5,"Odins_Pantry":55,"Odins_Raven_Returns":75,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":128,"Odins_Weapon_Memories":46},"pl":{},"pv":{"Odins_Almanac":"0.1.5","Odins_Drunk_Cam":"0.1.2","Odins_Dusk_Horn":"0.1.1","Odins_Free_Refills":"1.0.9","Odins_Hearth":"0.1.4","Odins_Knot":"0.1.1","Odins_Pantry":"0.1.3","Odins_Raven_Returns":"0.1.4","Odins_Saga":"0.1.3","Odins_Stone_Whispers":"0.1.1","Odins_Wanted_Posters":"0.2.7","Odins_Weapon_Memories":"0.1.2"},"src":"monitor","t":"2026-10-17T06:25:01+00:00","ts_err":false},{"dl":1111,"dm":1,"do":0,"folk":0,"gh":{"checked":true,"comments":0,"discussion_comments":0,"discussions":0,"forks":0,"issues":0,"prs":0,"stars":0,"watchers":0},"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":9,"Odins_Free_Refills":494,"Odins_Hearth":105,"Odins_Knot":7,"Odins_Pantry":55,"Odins_Raven_Returns":76,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":129,"Odins_Weapon_Memories":47},"pl":{},"pv":{"Odins_Almanac":"0.1.5","Odins_Drunk_Cam":"0.1.2","Odins_Dusk_Horn":"0.1.1","Odins_Free_Refills":"1.0.9","Odins_Hearth":"0.1.4","Odins_Knot":"0.1.1","Odins_Pantry":"0.1.3","Odins_Raven_Returns":"0.1.4","Odins_Saga":"0.1.3","Odins_Stone_Whispers":"0.1.1","Odins_Wanted_Posters":"0.2.7","Odins_Weapon_Memories":"0.1.2"},"src":"monitor","t":"2026-10-17T06:30:01+00:00","ts_err":false},{"dl":1111,"dm":1,"do":0,"folk":0,"gh":{"checked":false,"comments":0,"discussion_comments":0,"discussions":0,"forks":0,"issues":0,"prs":0,"stars":0,"watchers":0},"lk":0,"pk":{"Odins_Almanac":77,"Odins_Drunk_Cam":31,"Odins_Dusk_Horn":9,"Odins_Free_Refills":494,"Odins_Hearth":105,"Odins_Knot":7,"Odins_Pantry":55,"Odins_Raven_Returns":76,"Odins_Saga":60,"Odins_Stone_Whispers":21,"Odins_Wanted_Posters":129,"Odins_Weapon_Memories":47},"pl":{},"pv":{"Odins_Almanac":"0.1.5","Odins_Drunk_Cam":"0.1.2","Odins_Dusk_Horn":"0.1.1","Odins_Free_Refills":"1.0.9","Odins_Hearth":"0.1.4","Odins_Knot":"0.1.1","Odins_Pantry":"0.1.3","Odins_Raven_Returns":"0.1.4","Odins_Saga":"0.1.3","Odins_Stone_Whispers":"0.1.1","Odins_Wanted_Posters":"0.2.7","Odins_Weapon_Memories":"0.1.2"},"src":"monitor","t":"2026-10-17T06:35:01+00:00","ts_err":false}],"events":[{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Knot +1 download (now 4)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Knot-4"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Dusk Horn +1 download (now 8)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Dusk_Horn-8"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Stone Whispers +1 download (now 21)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Stone_Whispers-21"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Weapon Memories +1 download (now 44)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Weapon_Memories-44"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Drunk Cam +1 download (now 31)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Drunk_Cam-31"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Raven Returns +1 download (now 75)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Raven_Returns-75"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Pantry +1 download (now 54)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Pantry-54"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Hearth +2 downloads (now 104)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Hearth-104"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Saga +1 download (now 60)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Saga-60"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Almanac +1 download (now 77)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Almanac-77"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Wanted Posters +3 downloads (now 127)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Wanted_Posters-127"},{"t":"2026-10-17T05:54:04+00:00","type":"downloads","kind":"dl","text":"Odin's Free Refills +15 downloads (now 490)","id":"box-2026-10-17T05:54:04+00:00-downloads-Odins_Free_Refills-490"},{"t":"2026-10-17T05:54:04+00:00","type":"discord_members","kind":"disc","text":"Discord Odin's Tavern: None \u2192 1 members (0 online)","id":"box-2026-10-17T05:54:04+00:00-discord_members--1"},{"t":"2026-10-17T06:00:01+00:00","type":"downloads","kind":"dl","text":"Odin's Knot +1 download (now 5)","id":"box-2026-10-17T06:00:01+00:00-downloads-Odins_Knot-5"},{"t":"2026-10-17T06:00:01+00:00","type":"downloads","kind":"dl","text":"Odin's Weapon Memories +1 download (now 45)","id":"box-2026-10-17T06:00:01+00:00-downloads-Odins_Weapon_Memories-45"},{"t":"2026-10-17T06:00:01+00:00","type":"downloads","kind":"dl","text":"Odin's Free Refills +1 download (now 491)","id":"box-2026-10-17T06:00:01+00:00-downloads-Odins_Free_Refills-491"},{"t":"2026-10-17T06:01:30+00:00","type":"downloads","kind":"dl","text":"Odin's Weapon Memories +1 download (now 46)","id":"box-2026-10-17T06:01:30+00:00-downloads-Odins_Weapon_Memories-46"},{"t":"2026-10-17T06:05:01+00:00","type":"downloads","kind":"dl","text":"Odin's Pantry +1 download (now 55)","id":"box-2026-10-17T06:05:01+00:00-downloads-Odins_Pantry-55"},{"t":"2026-10-17T06:20:02+00:00","type":"downloads","kind":"dl","text":"Odin's Hearth +1 download (now 105)","id":"box-2026-10-17T06:20:02+00:00-downloads-Odins_Hearth-105"},{"t":"2026-10-17T06:25:01+00:00","type":"downloads","kind":"dl","text":"Odin's Wanted Posters +1 download (now 128)","id":"box-2026-10-17T06:25:01+00:00-downloads-Odins_Wanted_Posters-128"},{"t":"2026-10-17T06:25:01+00:00","type":"downloads","kind":"dl","text":"Odin's Free Refills +1 download (now 492)","id":"box-2026-10-17T06:25:01+00:00-downloads-Odins_Free_Refills-492"},{"t":"2026-10-17T06:30:01+00:00","type":"downloads","kind":"dl","text":"Odin's Knot +2 downloads (now 7)","id":"box-2026-10-17T06:30:01+00:00-downloads-Odins_Knot-7"},{"t":"2026-10-17T06:30:01+00:00","type":"downloads","kind":"dl","text":"Odin's Dusk Horn +1 download (now 9)","id":"box-2026-10-17T06:30:01+00:00-downloads-Odins_Dusk_Horn-9"},{"t":"2026-10-17T06:30:01+00:00","type":"downloads","kind":"dl","text":"Odin's Weapon Memories +1 download (now 47)","id":"box-2026-10-17T06:30:01+00:00-downloads-Odins_Weapon_Memories-47"},{"t":"2026-10-17T06:30:01+00:00","type":"downloads","kind":"dl","text":"Odin's Raven Returns +1 download (now 76)","id":"box-2026-10-17T06:30:01+00:00-downloads-Odins_Raven_Returns-76"},{"t":"2026-10-17T06:30:01+00:00","type":"downloads","kind":"dl","text":"Odin's Wanted Posters +1 download (now 129)","id":"box-2026-10-17T06:30:01+00:00-downloads-Odins_Wanted_Posters-129"},{"t":"2026-10-17T06:30:01+00:00","type":"downloads","kind":"dl","text":"Odin's Free Refills +2 downloads (now 494)","id":"box-2026-10-17T06:30:01+00:00-downloads-Odins_Free_Refills-494"}],"tavern":{"stars":0,"watchers":0,"forks":0,"created_at":"2026-10-17T05:12:35Z","pushed_at":"2026-10-17T05:12:40Z","issues":[],"discussions":[],"comments":0,"discussion_comments":0,"stargazers":[],"folk":[]},"discord":{"code":"wd2aGJdSNE","server":"Odin's Tavern","members":1,"online":0,"invite":"https://discord.gg/wd2aGJdSNE"}};
+</script>
+<script>
+"use strict";
+(function(){
+const D = window.ODIN_DATA || {packages:[],snapshots:[],events:[],tavern:{},discord:{}};
+const TZ = "America/Chicago", NS = "BeardedGiants", COMMUNITY = "valheim", GH = "hevyh2o", REPO = "OdinsTavern";
+const LS = "odin-hlidskjalf-v1";
+const POLL_TS_MS = 5*60e3, POLL_TS_HIDDEN_MS = 15*60e3, POLL_GH_MS = 15*60e3, POLL_DC_MS = 5*60e3;
+const H = 3600e3, DAY = 24*H;
+const $ = s => document.querySelector(s);
+const fmt = n => n==null||isNaN(n) ? "–" : Math.round(n).toLocaleString("en-US");
+const fmt1 = n => n==null||isNaN(n) ? "–" : (Math.abs(n)>=10 ? Math.round(n).toLocaleString("en-US") : n.toFixed(1));
+const dtf = new Intl.DateTimeFormat("en-US",{timeZone:TZ,month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"});
+const dtfShort = new Intl.DateTimeFormat("en-US",{timeZone:TZ,month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+const tfmt = new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric",minute:"2-digit",second:"2-digit",timeZoneName:"short"});
+const dayKey = new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit"});
+const dayLbl = new Intl.DateTimeFormat("en-US",{timeZone:TZ,weekday:"short",month:"short",day:"numeric"});
+const hourLbl = new Intl.DateTimeFormat("en-US",{timeZone:TZ,hour:"numeric"});
+const when = t => dtf.format(new Date(t));
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pretty = n => n.replace(/^Odins_/,"Odin's ").replace(/_/g," ");
+const ts = s => typeof s==="number" ? s : Date.parse(s);
+
+// ------------------------------------------------------------ persistent store
+let store = {};
+try { store = JSON.parse(localStorage.getItem(LS)||"{}"); } catch(e){ store = {}; }
+store.snapshots = store.snapshots || [];
+store.events = store.events || [];
+store.packages = store.packages || {};
+store.gh = store.gh || {};
+store.prefs = store.prefs || {muted:false};
+function save(){
+  try {
+    if (store.snapshots.length > 6000) store.snapshots = thin(store.snapshots, 6000);
+    if (store.events.length > 400) store.events = store.events.slice(-400);
+    localStorage.setItem(LS, JSON.stringify(store));
+  } catch(e){ console.warn("localStorage full", e); store.snapshots = thin(store.snapshots, 2000); }
+}
+function thin(arr, n){ // keep every change point, drop redundant repeats
+  const out=[]; for (let i=0;i<arr.length;i++){ const a=arr[i], b=out[out.length-1]; if(!b || b.dl!==a.dl || b.lk!==a.lk || a.t-b.t>30*60e3) out.push(a); }
+  return out.slice(-n);
+}
+
+// ------------------------------------------------------------ current model
+const pk = {}; // name -> {name, uuid, icon, url, created, versions:[{v,created,dl}], downloads, likes, latest, deprecated}
+for (const p of D.packages||[]) pk[p.name] = JSON.parse(JSON.stringify(p));
+for (const [n,p] of Object.entries(store.packages)) { // browser's newer live copy wins
+  if (!pk[n] || (p.seen||0) > ts(D.built_at||0)) pk[n] = Object.assign(pk[n]||{}, p);
+}
+let tav = Object.assign({stars:0,watchers:0,forks:0,issues:[],discussions:[],comments:0,discussion_comments:0,stargazers:[],folk:[]}, D.tavern||{});
+if (store.gh.tav && store.gh.tavSeen > ts(D.built_at||0)) tav = Object.assign(tav, store.gh.tav);
+let disc = Object.assign({}, D.discord||{});
+if (store.discord && store.discordSeen > ts(D.built_at||0)) disc = store.discord;
+const status = {ts:{state:"idle"}, gh:{state:"idle"}, dc:{state:"idle"}, box:{state:"ok"}};
+
+function allSnapshots(){
+  const m = new Map();
+  for (const s of (D.snapshots||[])) m.set(ts(s.t), Object.assign({}, s, {t:ts(s.t)}));
+  for (const s of store.snapshots) if(!m.has(s.t)) m.set(s.t, s);
+  return [...m.values()].filter(s=>s.dl!=null && !s.ts_err).sort((a,b)=>a.t-b.t);
+}
+function totals(){
+  let dl=0, lk=0; for (const p of Object.values(pk)) { dl += p.downloads||0; lk += p.likes||0; }
+  return {dl, lk, n:Object.keys(pk).length};
+}
+
+// ------------------------------------------------------------ reconstruction
+// Each version's downloads are spread evenly from its release until the next version's release
+// (the latest version: until now). Crude, but it's the only per-time signal Thunderstore exposes.
+function estMod(p, t, now){
+  let s=0; const vs=[...(p.versions||[])].sort((a,b)=>ts(a.created)-ts(b.created));
+  for (let i=0;i<vs.length;i++){
+    const c=ts(vs[i].created), e = i<vs.length-1 ? ts(vs[i+1].created) : now;
+    if (t<=c) continue;
+    s += (e<=c || t>=e) ? vs[i].dl : vs[i].dl*(t-c)/(e-c);
+  }
+  return s;
+}
+function estTotal(t, now){ let s=0; for (const p of Object.values(pk)) s+=estMod(p,t,now); return s; }
+function series(ts_, vs_){ return {t:ts_, v:vs_}; }
+function interp(S, t){ // S sorted by t; linear interpolation, null outside range
+  const T=S.t; if (!T.length || t<T[0] || t>T[T.length-1]) return null;
+  let lo=0, hi=T.length-1;
+  while (hi-lo>1){ const m=(lo+hi)>>1; if (T[m]<=t) lo=m; else hi=m; }
+  if (T[lo]===t || hi===lo) return S.v[lo];
+  return S.v[lo] + (S.v[hi]-S.v[lo])*(t-T[lo])/(T[hi]-T[lo]);
+}
+function makeBest(snaps, now){
+  const first = snaps.length ? snaps[0].t : Infinity, tot = totals();
+  const totS = series(snaps.map(s=>s.t).concat([now]), snaps.map(s=>s.dl).concat([tot.dl]));
+  const modS = {}, e0 = {}, o0 = {};
+  for (const p of Object.values(pk)){
+    const T=[], V=[]; for (const s of snaps){ const v=(s.pk||{})[p.name]; if (v!=null){ T.push(s.t); V.push(v); } }
+    T.push(now); V.push(p.downloads||0); modS[p.name]=series(T,V);
+    o0[p.name] = T.length>1 ? V[0] : null; e0[p.name] = T.length>1 ? estMod(p, T[0], now) : null;
+  }
+  const eTot0 = snaps.length ? estTotal(first, now) : null;
+  return function(key, t){
+    if (t>=now) return key ? (pk[key]||{}).downloads||0 : tot.dl;
+    if (key){
+      const p=pk[key]; if(!p) return 0;
+      const v=interp(modS[key], t); if (v!=null) return v;
+      const e=estMod(p,t,now);   // pin reconstruction to the first observed value so the curves join
+      return (o0[key]!=null && e0[key]>0) ? e*o0[key]/e0[key] : e;
+    }
+    if (t>=first){ const v=interp(totS, t); if (v!=null) return v; }
+    const e=estTotal(t,now);
+    return (eTot0>0) ? e*snaps[0].dl/eTot0 : e;
+  };
+}
+
+// ------------------------------------------------------------ SVG charts
+function svgEl(w,h,inner){ return `<svg class="chart" viewBox="0 0 ${w} ${h}" role="img">${inner}</svg>`; }
+function niceMax(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); for (const m of [1,1.5,2,2.5,3,4,5,6,8,10]) if (m*p>=v) return m*p; return 10*p; }
+function lineChart(el, series, o){
+  const W=Math.max(300,Math.round(el.clientWidth||760)),Hh=o.h||260,L=48,R=12,T=12,B=28;
+  let x0=Infinity,x1=-Infinity,y1=0;
+  for (const s of series) for (const [x,y] of s.pts){ x0=Math.min(x0,x); x1=Math.max(x1,x); y1=Math.max(y1,y); }
+  if (!isFinite(x0)||x1<=x0){ el.innerHTML='<div class="note">Not enough data yet.</div>'; return; }
+  const ymin = o.ymin!=null ? o.ymin : 0, ym=niceMax(y1*1.05 - ymin)+ymin;
+  const X=x=>L+(x-x0)/(x1-x0)*(W-L-R), Y=y=>T+(1-(y-ymin)/(ym-ymin))*(Hh-T-B);
+  let g='';
+  for (let i=0;i<=4;i++){ const v=ymin+(ym-ymin)*i/4, y=Y(v); g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#3a2b1a"/><text x="${L-6}" y="${y+4}" text-anchor="end">${fmt(v)}</text>`; }
+  const span=x1-x0, ticks=W<500?3:6;
+  for (let i=0;i<=ticks;i++){ const t=x0+span*i/ticks, x=X(t); const lbl = span>3*DAY ? dayLbl.format(new Date(t)).replace(/^\w+, /,"") : dtfShort.format(new Date(t)).replace(/^\w+ \d+, /,""); g+=`<text x="${x}" y="${Hh-8}" text-anchor="${i===0?'start':i===ticks?'end':'middle'}">${esc(lbl)}</text>`; }
+  for (const m of (o.markers||[])) { if (m.t<x0||m.t>x1) continue; const x=X(m.t); g+=`<line x1="${x}" x2="${x}" y1="${T}" y2="${Hh-B}" stroke="var(--ice)" stroke-opacity=".35" stroke-width="1.5"><title>${esc(m.label)}</title></line>`; }
+  for (const s of series){
+    if (!s.pts.length) continue;
+    const d=s.pts.map(([x,y],i)=>(i?'L':'M')+X(x).toFixed(1)+','+Y(y).toFixed(1)).join('');
+    if (s.fill) g+=`<path d="${d}L${X(s.pts[s.pts.length-1][0]).toFixed(1)},${Y(ymin)}L${X(s.pts[0][0]).toFixed(1)},${Y(ymin)}Z" fill="${s.fill}"/>`;
+    g+=`<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.w||2.2}" ${s.dash?`stroke-dasharray="${s.dash}"`:''} vector-effect="non-scaling-stroke"/>`;
+    if (s.dots) for (const [x,y] of s.pts) g+=`<circle cx="${X(x)}" cy="${Y(y)}" r="2.6" fill="${s.color}"><title>${esc(when(x))}: ${fmt(y)}</title></circle>`;
+  }
+  el.innerHTML = svgEl(W,Hh,g);
+}
+function barChart(el, bars, o){
+  const W=Math.max(300,Math.round(el.clientWidth||760)),Hh=o.h||200,L=40,R=8,T=10,B=26;
+  if (!bars.length){ el.innerHTML='<div class="note">Not enough data yet.</div>'; return; }
+  const ym=niceMax(Math.max(1,...bars.map(b=>b.v))*1.1), bw=(W-L-R)/bars.length;
+  const Y=y=>T+(1-y/ym)*(Hh-T-B);
+  let g='';
+  for (let i=0;i<=3;i++){ const v=ym*i/3, y=Y(v); g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#3a2b1a"/><text x="${L-5}" y="${y+4}" text-anchor="end">${fmt1(v)}</text>`; }
+  const every=Math.ceil(bars.length/Math.max(3,Math.min(o.labels||12, Math.floor(W/60))));
+  bars.forEach((b,i)=>{ const x=L+i*bw, y=Y(Math.max(0,b.v));
+    g+=`<rect x="${(x+bw*0.12).toFixed(1)}" y="${y.toFixed(1)}" width="${(bw*0.76).toFixed(1)}" height="${(Hh-B-y).toFixed(1)}" rx="2" fill="${b.est?'#8a6a35':'var(--gold2)'}"><title>${esc(b.title||b.label)}: ${fmt1(b.v)}${b.est?' (estimate)':''}</title></rect>`;
+    if (i%every===0) g+=`<text x="${x+bw/2}" y="${Hh-8}" text-anchor="middle">${esc(b.label)}</text>`; });
+  el.innerHTML = svgEl(W,Hh,g);
+}
+function spark(vals){
+  if (vals.length<2) return '';
+  const w=90,h=22, mn=Math.min(...vals), mx=Math.max(...vals), r=(mx-mn)||1;
+  const d=vals.map((v,i)=>(i?'L':'M')+(i/(vals.length-1)*w).toFixed(1)+','+(h-2-(v-mn)/r*(h-4)).toFixed(1)).join('');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="none" stroke="var(--gold)" stroke-width="1.6"/></svg>`;
+}
+
+// ------------------------------------------------------------ audio
+let actx=null;
+function ensureAudio(fromClick){
+  try {
+    if (!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    if (actx.state==="suspended" && fromClick) actx.resume();
+  } catch(e){ actx=null; }
+  updateSoundBtn();
+  return actx && actx.state==="running";
+}
+function tone(f, t0, dur, type, vol, glideTo, filt){
+  const o=actx.createOscillator(), g=actx.createGain(); let node=o;
+  o.type=type||"sine"; o.frequency.setValueAtTime(f,t0); if (glideTo) o.frequency.exponentialRampToValueAtTime(glideTo,t0+dur);
+  g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  if (filt){ const bq=actx.createBiquadFilter(); bq.type="lowpass"; bq.frequency.value=filt; o.connect(bq); node=bq; }
+  node.connect(g); g.connect(actx.destination); o.start(t0); o.stop(t0+dur+0.05);
+}
+const SOUNDS = {
+  dl(){ const t=actx.currentTime; tone(1318.5,t,0.18,"triangle",0.16); tone(1975.5,t+0.09,0.35,"sine",0.12); },              // coin clink
+  like(){ const t=actx.currentTime; [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,t+i*0.09,0.6,"sine",0.12)); },          // warm arpeggio
+  tav(){ const t=actx.currentTime; tone(146.8,t,1.1,"sawtooth",0.16,null,900); tone(220,t+0.35,1.2,"sawtooth",0.14,null,1100); tone(293.7,t+0.75,1.0,"sawtooth",0.10,null,1300); }, // war horn
+  disc(){ const t=actx.currentTime; tone(110,t,0.35,"sine",0.35,45); tone(110,t+0.28,0.35,"sine",0.3,45); },                    // drum
+  ver(){ const t=actx.currentTime; [392,523.25,659.25,783.99].forEach((f,i)=>tone(f,t+i*0.12,0.5,"square",0.06,null,2200)); }, // fanfare
+};
+function play(kind){ if (store.prefs.muted || !actx || actx.state!=="running") return; try { (SOUNDS[kind]||SOUNDS.dl)(); } catch(e){} }
+function updateSoundBtn(){
+  const b=$("#btnSound"), running = actx && actx.state==="running";
+  b.textContent = running ? "🔊 Sound ready" : "🔈 Enable sound";
+  b.classList.toggle("pulse", !running); b.classList.toggle("primary", !running);
+  $("#btnMute").textContent = store.prefs.muted ? "🔕 Muted" : "🔔 Alerts on";
+}
+
+// ------------------------------------------------------------ events / alerts
+const ICON={dl:"⬇️",like:"❤️",tav:"🍺",disc:"💬",ver:"📜"};
+function eventKind(type){
+  if (type==="downloads") return "dl";
+  if (type==="likes") return "like";
+  if (/discord/.test(type)) return "disc";
+  if (/new_version|new_package/.test(type)) return "ver";
+  return "tav";
+}
+let unseen=0;
+function pushEvents(evs, opts){
+  if (!evs.length) return;
+  const ids=new Set(store.events.map(e=>e.id));
+  const fresh=evs.filter(e=>!ids.has(e.id));
+  if (!fresh.length) return;
+  store.events.push(...fresh); store.events.sort((a,b)=>a.t-b.t); save();
+  if (opts && opts.silent) { renderFeed(); return; }
+  const kinds=new Set(fresh.map(e=>e.kind));
+  const order=["tav","like","ver","disc","dl"]; let i=0;
+  for (const k of order) if (kinds.has(k)) { setTimeout(()=>play(k), i*900); i++; }
+  for (const e of fresh.slice(-4)) toast(e);
+  if (fresh.length>4) toast({kind:"dl",text:`…and ${fresh.length-4} more raven reports`});
+  for (const k of kinds) document.querySelectorAll(`[data-flash~="${k}"]`).forEach(el=>{ el.classList.remove("flash","dl","like","tav","disc"); void el.offsetWidth; el.classList.add("flash",k==="ver"?"dl":k); });
+  if (document.hidden){ unseen+=fresh.length; document.title=`(${unseen}) Odin's Hlidskjalf`; }
+  renderFeed(new Set(fresh.map(e=>e.id)));
+}
+function toast(e){
+  const d=document.createElement("div"); d.className="toast "+(e.kind||"");
+  d.innerHTML=`${ICON[e.kind]||"🐦"} ${esc(e.text)}`; $("#toasts").appendChild(d);
+  setTimeout(()=>d.remove(), 9000);
+}
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden){ unseen=0; document.title="Odin's Hlidskjalf · BeardedGiants watch"; schedule(); } });
+
+// ------------------------------------------------------------ live polling
+async function getJSON(url, opts){
+  const r = await fetch(url, Object.assign({cache:"no-cache"}, opts||{}));
+  if (!r.ok){ const e=new Error(url+" -> HTTP "+r.status); e.status=r.status; e.resp=r; throw e; }
+  return {body: await r.json(), resp: r};
+}
+function pkgSnapshotMap(){ return Object.fromEntries(Object.values(pk).map(p=>[p.name,p.downloads])); }
+
+async function pollThunderstore(){
+  status.ts={state:"busy"}; renderStatus();
+  const evs=[], now=Date.now(); let ok=0, fail=0;
+  await Promise.all(Object.values(pk).map(async p=>{
+    if (!p.uuid) return;
+    try {
+      const {body:x} = await getJSON(`https://thunderstore.io/c/${COMMUNITY}/api/v1/package/${p.uuid}/`);
+      const vers = x.versions.map(v=>({v:v.version_number, created:v.date_created, dl:v.downloads}));
+      const dl = vers.reduce((a,v)=>a+v.dl,0), likes = x.rating_score||0;
+      const old = {dl:p.downloads, lk:p.likes, vs:new Set((p.versions||[]).map(v=>v.v))};
+      if (old.dl!=null && dl>old.dl) evs.push({id:`dl-${p.name}-${dl}`, t:now, kind:"dl", type:"downloads", pkg:p.name, text:`${pretty(p.name)} +${dl-old.dl} download${dl-old.dl>1?"s":""} (now ${fmt(dl)})`});
+      if (old.lk!=null && likes!==old.lk) evs.push({id:`lk-${p.name}-${likes}`, t:now, kind:"like", type:"likes", pkg:p.name, text:`${pretty(p.name)} ${likes>old.lk?"got a like":"lost a like"}: ${likes} like${likes===1?"":"s"}`});
+      for (const v of vers) if (old.vs.size && !old.vs.has(v.v)) evs.push({id:`ver-${p.name}-${v.v}`, t:now, kind:"ver", type:"new_version", pkg:p.name, text:`${pretty(p.name)} v${v.v} is live on Thunderstore`});
+      Object.assign(p,{downloads:dl, likes, versions:vers, latest:vers[0]&&vers[0].v, deprecated:x.is_deprecated, icon:(x.versions[0]||{}).icon||p.icon, url:x.package_url, created:x.date_created, seen:now});
+      store.packages[p.name]=p; ok++;
+    } catch(e){ fail++; console.warn(e); }
+  }));
+  status.ts = {state: fail&&!ok?"bad":fail?"warn":"ok", at:now, msg: fail?`${fail} package request(s) failed`:""};
+  if (ok){
+    const t=totals(), last=store.snapshots[store.snapshots.length-1];
+    const snap={t:now, src:"browser", dl:t.dl, lk:t.lk, pk:pkgSnapshotMap(), gh:{stars:tav.stars,watchers:tav.watchers,issues:(tav.issues||[]).filter(i=>!i.pr).length,comments:tav.comments,discussions:(tav.discussions||[]).length}, folk:(tav.folk||[]).length, dm:disc.members, do:disc.online};
+    if (!last || last.dl!==snap.dl || last.lk!==snap.lk || now-last.t>15*60e3) store.snapshots.push(snap);
+    save();
+  }
+  pushEvents(evs); renderAll();
+}
+
+async function pollDiscord(){
+  const code = disc.code || (D.discord||{}).code; if (!code) return;
+  status.dc={state:"busy"};
+  try {
+    const {body:d} = await getJSON(`https://discord.com/api/v10/invites/${code}?with_counts=true`, {cache:"no-store"});
+    const old=disc.members; const nw={code, server:(d.guild||{}).name, members:d.approximate_member_count, online:d.approximate_presence_count, invite:`https://discord.gg/${code}`};
+    if (old!=null && nw.members!==old) pushEvents([{id:`dc-${nw.members}-${Date.now()}`, t:Date.now(), kind:"disc", type:"discord_members", text:`Discord ${nw.server||""}: ${old} → ${nw.members} members (${nw.online} online)`}]);
+    disc=nw; store.discord=nw; store.discordSeen=Date.now(); save();
+    status.dc={state:"ok", at:Date.now()};
+  } catch(e){ status.dc={state:"bad", at:Date.now(), msg:e.message}; }
+  renderAll();
+}
+
+async function gh(url, accept){
+  const r = await fetch(url, {cache:"no-cache", headers: accept?{Accept:accept}:{}});
+  const rem=r.headers.get("X-RateLimit-Remaining"), reset=r.headers.get("X-RateLimit-Reset");
+  if (rem!=null){ store.gh.remaining=+rem; store.gh.reset=(+reset)*1000; }
+  if (r.status===404) return null;
+  if (!r.ok) throw new Error("GitHub HTTP "+r.status);
+  return r.json();
+}
+async function pollGitHub(force){
+  const now=Date.now();
+  if (!force && store.gh.lastPoll && now-store.gh.lastPoll < POLL_GH_MS-30e3) return;           // shared across tabs via localStorage
+  if (store.gh.remaining!=null && store.gh.remaining<10 && store.gh.reset>now){ status.gh={state:"warn", msg:`GitHub quota low, waiting until ${tfmt.format(new Date(store.gh.reset))}`}; renderStatus(); return; }
+  store.gh.lastPoll=now; save(); status.gh={state:"busy"}; renderStatus();
+  const base=`https://api.github.com/repos/${GH}/${REPO}`;
+  try {
+    const info=await gh(base); if(!info) throw new Error("tavern repo not found");
+    const n={stars:info.stargazers_count, watchers:info.subscribers_count, forks:info.forks_count, created_at:info.created_at, pushed_at:info.pushed_at};
+    const issues=(await gh(`${base}/issues?state=all&per_page=100`))||[];
+    n.issues=issues.map(i=>({n:i.number,title:i.title,user:i.user&&i.user.login,state:i.state,created:i.created_at,url:i.html_url,pr:!!i.pull_request,comments:i.comments}));
+    const comments=(await gh(`${base}/issues/comments?per_page=100`))||[];
+    n.comments=comments.length; n.commenters=comments.map(c=>c.user&&c.user.login);
+    n.discussions=[]; n.discussion_comments=0; let dUsers=[];
+    if (info.has_discussions){ const ds=(await gh(`${base}/discussions?per_page=100`))||[];
+      n.discussions=ds.map(d=>({n:d.number,title:d.title,user:d.user&&d.user.login,created:d.created_at,url:d.html_url,comments:d.comments,category:(d.category||{}).name}));
+      n.discussion_comments=ds.reduce((a,d)=>a+(d.comments||0),0); dUsers=ds.map(d=>d.user&&d.user.login); }
+    n.stargazers = n.stars ? ((await gh(`${base}/stargazers?per_page=100`,"application/vnd.github.star+json"))||[]).map(s=>({user:s.user.login, at:s.starred_at})) : [];
+    const subs = n.watchers ? ((await gh(`${base}/subscribers?per_page=100`))||[]).map(s=>s.login) : [];
+    const folk=new Set([...n.stargazers.map(s=>s.user), ...subs, ...n.issues.map(i=>i.user), ...n.commenters, ...dUsers].filter(u=>u&&u!==GH));
+    n.folk=[...folk].sort(); delete n.commenters;
+    const o=tav, evs=[], t=Date.now(); const had=store.gh.tavSeen||D.built_at;
+    if (had){
+      if (n.stars>o.stars) evs.push({id:`st-${n.stars}`,t,kind:"tav",type:"stars",text:`The tavern earned a star (${n.stars} total)`});
+      if (n.watchers>o.watchers) evs.push({id:`wa-${n.watchers}`,t,kind:"tav",type:"watchers",text:`Someone is watching the tavern (${n.watchers} watchers)`});
+      const oi=new Set((o.issues||[]).map(i=>i.n)); for (const i of n.issues) if(!oi.has(i.n)) evs.push({id:`is-${i.n}`,t,kind:"tav",type:"new_issue",text:`New ${i.pr?"PR":"issue"} #${i.n} by ${i.user}: ${i.title}`,url:i.url});
+      const od=new Set((o.discussions||[]).map(d=>d.n)); for (const d of n.discussions) if(!od.has(d.n)) evs.push({id:`di-${d.n}`,t,kind:"tav",type:"new_discussion",text:`New discussion #${d.n} by ${d.user}: ${d.title}`,url:d.url});
+      if (n.comments>(o.comments||0)) evs.push({id:`ic-${n.comments}`,t,kind:"tav",type:"new_comment",text:`${n.comments-(o.comments||0)} new comment(s) in the tavern`});
+      if (n.discussion_comments>(o.discussion_comments||0)) evs.push({id:`dc2-${n.discussion_comments}`,t,kind:"tav",type:"new_discussion_comment",text:`${n.discussion_comments-(o.discussion_comments||0)} new discussion repl(ies)`});
+      const of=new Set(o.folk||[]); const nf=n.folk.filter(u=>!of.has(u)); if (nf.length) evs.push({id:`fk-${nf.join(",")}`,t,kind:"tav",type:"tavern_newcomers",text:`New face${nf.length>1?"s":""} in the tavern: ${nf.join(", ")}`});
+    }
+    tav=Object.assign({}, tav, n); store.gh.tav=tav; store.gh.tavSeen=Date.now(); save();
+    status.gh={state:"ok", at:Date.now()}; pushEvents(evs);
+  } catch(e){ status.gh={state:"bad", at:Date.now(), msg:e.message}; }
+  renderAll();
+}
+
+let timers=[];
+function schedule(){
+  timers.forEach(clearTimeout); timers=[];
+  const tsMs = document.hidden ? POLL_TS_HIDDEN_MS : POLL_TS_MS;
+  const loop=(fn,ms)=>{ const run=async()=>{ try{ await fn(); } finally { timers.push(setTimeout(run, typeof ms==="function"?ms():ms)); } }; timers.push(setTimeout(run, typeof ms==="function"?ms():ms)); };
+  loop(pollThunderstore, ()=>document.hidden?POLL_TS_HIDDEN_MS:POLL_TS_MS);
+  loop(pollDiscord, POLL_DC_MS);
+  loop(()=>pollGitHub(false), 60e3); // checks every minute, polls only when 15 min have passed (any tab)
+  status.next = Date.now()+tsMs;
+}
+
+// ------------------------------------------------------------ analytics
+function analytics(){
+  const now=Date.now(), snaps=allSnapshots(), best=makeBest(snaps, now), tot=totals();
+  const obsStart = snaps.length? snaps[0].t : null, obsSpanH = obsStart? (now-obsStart)/H : 0;
+  const firstRel = Math.min(...Object.values(pk).map(p=>ts(p.created)||now));
+  const rate = (key, hrs) => (best(key, now) - best(key, now-hrs*H)) / hrs;           // downloads per hour
+  const r24 = rate(null,24), rPrev = (best(null,now-24*H)-best(null,now-48*H))/24;
+  const lifeH = (now-firstRel)/H, rLife = tot.dl/Math.max(1,lifeH);
+  const rObs = obsSpanH>=0.5 ? (tot.dl - snaps[0].dl)/obsSpanH : null;
+  const mods = Object.values(pk).map(p=>{
+    const age=(now-ts(p.created))/H, a=rate(p.name,24), b=(best(p.name,now-24*H)-best(p.name,now-48*H))/24;
+    let trend="flat", arrow="→";
+    if (age<48){ trend="new"; arrow="✦"; }
+    else if (a>b*1.25 && a-b>0.02) { trend="up"; arrow="▲"; }
+    else if (a<b*0.8 && b-a>0.02) { trend="down"; arrow="▼"; }
+    const obs = obsStart && snaps[0].pk && snaps[0].pk[p.name]!=null && obsSpanH>=0.5 ? (p.downloads-snaps[0].pk[p.name])/obsSpanH : null;
+    const next = nextRound(p.downloads||0);
+    const eta = a>0 ? now + (next-(p.downloads||0))/a*H : null;
+    const sparkVals=[]; for (let i=0;i<=24;i++) sparkVals.push(best(p.name, now-(24-i)*2*H));
+    return {p, age, r24:a, rPrev:b, trend, arrow, share: tot.dl? (p.downloads||0)/tot.dl : 0, avgDay:(p.downloads||0)/Math.max(age/24,1/24), obs, next, eta, growth: (p.downloads? a*24/Math.max(1,p.downloads-a*24) : 0), spark:sparkVals};
+  });
+  return {now, snaps, best, tot, obsStart, obsSpanH, firstRel, r24, rPrev, rLife, rObs, mods, lifeH};
+}
+function nextRound(n){ const steps=[10,25,50,100,250,500,1000,2500,5000,10000,25000,50000,100000]; for (const s of steps) if (s>n) return s; return Math.ceil((n+1)/100000)*100000; }
+
+// ------------------------------------------------------------ rendering
+function kpi(id, label, val, hint, flash, big){ return `<div class="card kpi${big?" big":""}" id="${id}" data-flash="${flash||""}"><div class="lbl">${label}</div><div class="val">${val}</div><div class="hint">${hint||""}</div></div>`; }
+let kpiBuilt=false;
+function renderKPIs(A){
+  const t=A.tot, iss=(tav.issues||[]).filter(i=>!i.pr), openIss=iss.filter(i=>i.state==="open").length;
+  const vcount=Object.values(pk).reduce((a,p)=>a+(p.versions||[]).length,0);
+  const html = [
+    kpi("k-dl","Total downloads", fmt(t.dl), `${fmt1(A.r24)}/h · ≈ ${fmt(A.r24*24)} in the last 24 h`, "dl", true),
+    kpi("k-lk","Likes", fmt(t.lk), t.lk? "across all mods":"no likes yet", "like"),
+    kpi("k-mods","Mods", fmt(t.n), `${vcount} versions released`, "ver"),
+    kpi("k-rate","Pace (24 h)", fmt1(A.r24*24)+"/day", A.rPrev>0? `${A.r24>=A.rPrev?"▲":"▼"} vs ${fmt1(A.rPrev*24)}/day the day before`:"", "dl"),
+    kpi("k-stars","Tavern stars", fmt(tav.stars), `${fmt(tav.watchers)} watching · ${fmt(tav.forks)} forks`, "tav"),
+    kpi("k-iss","Tavern issues", fmt(iss.length), `${openIss} open`, "tav"),
+    kpi("k-disc","Discussions", fmt((tav.discussions||[]).length), `${fmt(tav.discussion_comments||0)} replies`, "tav"),
+    kpi("k-com","Issue comments", fmt(tav.comments||0), "", "tav"),
+    kpi("k-folk","Outside visitors", fmt((tav.folk||[]).length), (tav.folk||[]).slice(0,4).join(", ")||"nobody yet but you", "tav"),
+    kpi("k-dc","Discord members", fmt(disc.members), disc.members!=null? `${fmt(disc.online)} online now`:"no invite yet", "disc"),
+  ].join("");
+  if (!kpiBuilt){ $("#kpis").innerHTML=html; kpiBuilt=true; return; }
+  // update values in place so flash animations survive
+  const tmp=document.createElement("div"); tmp.innerHTML=html;
+  tmp.querySelectorAll(".kpi").forEach(n=>{ const cur=document.getElementById(n.id); if(cur){ cur.querySelector(".val").innerHTML=n.querySelector(".val").innerHTML; cur.querySelector(".hint").innerHTML=n.querySelector(".hint").innerHTML; } });
+}
+function renderTotalChart(A){
+  const now=A.now, start=A.firstRel, pts=[], step=Math.max(15*60e3,(now-start)/240);
+  const endRec = A.obsStart || now;
+  for (let t=start; t<endRec; t+=step) pts.push([t, A.best(null,t)]);
+  pts.push([endRec, A.best(null,endRec)]);
+  const obs=A.snaps.map(s=>[s.t,s.dl]); obs.push([now,A.tot.dl]);
+  const markers=[]; for (const p of Object.values(pk)) for (const v of (p.versions||[])) markers.push({t:ts(v.created), label:`${pretty(p.name)} v${v.v} · ${when(v.created)}`});
+  lineChart($("#chartTotal"), [
+    {pts, color:"var(--gold)", dash:"5 4", fill:"rgba(224,176,74,.08)"},
+    {pts:obs, color:"var(--gold2)", w:3, dots: obs.length<60},
+  ], {markers, h:270});
+  $("#histNote").textContent = `${fmt(A.snaps.length)} snapshots over ${fmt1(A.obsSpanH)} h observed · reconstruction back to ${dayLbl.format(new Date(A.firstRel))}`;
+}
+function renderRates(A){
+  const now=A.now, hourStart=Math.floor(now/H)*H, bars=[];
+  for (let i=47;i>=0;i--){ const a=hourStart-i*H, b=Math.min(a+H,now);
+    bars.push({label:hourLbl.format(new Date(a)), title:`${when(a)}`, v:A.best(null,b)-A.best(null,a), est: !A.obsStart || a < A.obsStart}); }
+  barChart($("#chartHourly"), bars, {labels:12});
+  const days=new Map(); const step=H;
+  for (let t=Math.floor(A.firstRel/H)*H; t<now; t+=step){ const b=Math.min(t+step,now), k=dayKey.format(new Date(t));
+    const d=days.get(k)||{v:0,est:0,tot:0,t}; const dv=A.best(null,b)-A.best(null,t); d.v+=dv; if(!A.obsStart||t<A.obsStart) d.est+=dv; d.tot+=dv; days.set(k,d); }
+  barChart($("#chartDaily"), [...days.values()].map(d=>({label:dayLbl.format(new Date(d.t)).replace(/,.*/,"")+" "+dayLbl.format(new Date(d.t)).replace(/^\w+, \w+ /,""), title:dayLbl.format(new Date(d.t)), v:d.v, est:d.est>d.v/2})), {labels:10});
+}
+function renderShare(A){
+  const rows=[...A.mods].sort((a,b)=>(b.p.downloads||0)-(a.p.downloads||0));
+  $("#share").innerHTML = rows.map(m=>`<div class="share-row" id="sh-${m.p.name}"><span class="n" title="${esc(pretty(m.p.name))}">${esc(pretty(m.p.name).replace("Odin's ",""))}</span><div class="bar"><span style="width:${(m.share*100).toFixed(1)}%"></span></div><span class="p">${(m.share*100).toFixed(1)}%</span></div>`).join("");
+}
+let sortKey="downloads", sortDir=-1;
+function renderTable(A){
+  const cols=[["mod","Mod"],["downloads","Downloads"],["likes","Likes"],["latest","Version"],["versions","Vers."],["age","Age"],["avgDay","Avg/day"],["r24","24 h"],["obs","Observed /h"],["trend","Trend"],["share","Share"],["spark","Last 48 h"],["eta","Next milestone (est.)"]];
+  const val=(m,k)=>({mod:m.p.name,downloads:m.p.downloads||0,likes:m.p.likes||0,latest:m.p.latest||"",versions:(m.p.versions||[]).length,age:m.age,avgDay:m.avgDay,r24:m.r24,obs:m.obs==null?-1:m.obs,trend:m.r24-m.rPrev,share:m.share,spark:m.r24,eta:m.eta||Infinity})[k];
+  const rows=[...A.mods].sort((a,b)=>{ const x=val(a,sortKey), y=val(b,sortKey); return (x>y?1:x<y?-1:0)*sortDir; });
+  const ageTxt=h=> h<48? `${fmt1(h)} h` : `${fmt1(h/24)} d`;
+  $("#modTable").innerHTML = `<thead><tr>${cols.map(([k,l])=>`<th data-k="${k}">${l}${sortKey===k?(sortDir<0?" ▾":" ▴"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(m=>`<tr id="row-${m.p.name}">
+    <td><div class="modname">${m.p.icon?`<img src="${esc(m.p.icon)}" alt="" loading="lazy">`:""}<a href="${esc(m.p.url||`https://thunderstore.io/c/valheim/p/${NS}/${m.p.name}/`)}" target="_blank" rel="noopener">${esc(pretty(m.p.name))}</a>${m.p.deprecated?' <span class="estimate">deprecated</span>':""}</div></td>
+    <td>${fmt(m.p.downloads)}</td><td>${fmt(m.p.likes)}</td><td>${esc(m.p.latest||"")}</td><td>${(m.p.versions||[]).length}</td><td>${ageTxt(m.age)}</td>
+    <td>${fmt1(m.avgDay)}</td><td>${fmt1(m.r24*24)}</td><td>${m.obs==null?"–":fmt1(m.obs)}</td>
+    <td class="${m.trend}" title="last 24 h ${fmt1(m.r24*24)} vs prior 24 h ${fmt1(m.rPrev*24)}">${m.arrow} ${m.trend==="new"?"new":m.trend==="up"?"rising":m.trend==="down"?"slowing":"steady"}</td>
+    <td>${(m.share*100).toFixed(1)}%</td><td>${spark(m.spark)}</td>
+    <td>${fmt(m.next)} · ${m.eta? (m.eta-A.now>90*DAY?"90+ days":dtfShort.format(new Date(m.eta))):"–"}</td></tr>`).join("")}</tbody>`;
+  $("#modTable").querySelectorAll("th").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; if(k===sortKey) sortDir*=-1; else { sortKey=k; sortDir=k==="mod"?1:-1; } renderTable(analytics()); });
+}
+function renderProjections(A){
+  const cur=A.tot.dl;
+  // pace for projections: observed pace once we have >= 12 h of snapshots, otherwise last-24h (partly reconstructed)
+  const useObs = A.rObs!=null && A.obsSpanH>=12;
+  const pace = useObs ? (A.obsSpanH>=24 ? A.r24 : A.rObs) : A.r24;
+  const lo = Math.min(pace, A.rLife, A.rPrev>0?A.rPrev:pace), hi=Math.max(pace, A.rLife);
+  const eta = (target, r) => r>0 ? A.now + (target-cur)/r*H : null;
+  const show = t => t==null ? "–" : t-A.now>365*DAY ? "over a year" : dtf.format(new Date(t));
+  const ms=[1250,1500,2000,2500,5000,10000,25000].filter(m=>m>cur).slice(0,5);
+  const decay = d => { // pace halves every 7 days (typical post-launch fade)
+    const k=Math.LN2/(7*24); return pace*(1-Math.exp(-k*d*24))/k; };
+  const fastest=[...A.mods].sort((a,b)=>b.r24-a.r24)[0], fastestPct=[...A.mods].filter(m=>m.p.downloads>=10).sort((a,b)=>b.growth-a.growth)[0];
+  const cards = ms.map(m=>`<div class="card"><div class="lbl">${fmt(m)} total downloads</div><div class="v">${show(eta(m,pace))}</div><div class="s">${fmt(m-cur)} to go at ${fmt1(pace*24)}/day · range ${show(eta(m,hi))} to ${show(eta(m,lo))}</div></div>`);
+  cards.push(`<div class="card"><div class="lbl">In 7 days</div><div class="v">≈ ${fmt(cur+pace*24*7)}</div><div class="s">steady pace · ${fmt(cur+decay(7))} if the pace halves weekly</div></div>`);
+  cards.push(`<div class="card"><div class="lbl">In 30 days</div><div class="v">≈ ${fmt(cur+pace*24*30)}</div><div class="s">steady pace · ${fmt(cur+decay(30))} if the pace halves weekly</div></div>`);
+  if (fastest) cards.push(`<div class="card"><div class="lbl">Fastest mod (raw pace)</div><div class="v">${esc(pretty(fastest.p.name))}</div><div class="s">${fmt1(fastest.r24*24)}/day · next ${fmt(fastest.next)} by ${fastest.eta?show(fastest.eta):"–"}</div></div>`);
+  if (fastestPct && fastestPct!==fastest) cards.push(`<div class="card"><div class="lbl">Fastest growing (relative)</div><div class="v">${esc(pretty(fastestPct.p.name))}</div><div class="s">+${(fastestPct.growth*100).toFixed(0)}% in 24 h (${fmt1(fastestPct.r24*24)}/day)</div></div>`);
+  const leader=[...A.mods].sort((a,b)=>b.p.downloads-a.p.downloads)[0], second=[...A.mods].sort((a,b)=>b.p.downloads-a.p.downloads)[1];
+  if (leader&&second&&second.r24>leader.r24){ const h=(leader.p.downloads-second.p.downloads)/(second.r24-leader.r24); cards.push(`<div class="card"><div class="lbl">Could take the lead</div><div class="v">${esc(pretty(second.p.name))}</div><div class="s">passes ${esc(pretty(leader.p.name))} around ${show(A.now+h*H)} if both keep their 24 h pace</div></div>`); }
+  $("#proj").innerHTML=cards.join("");
+  $("#projBasis").textContent = useObs ? `based on ${fmt1(A.obsSpanH)} h of observed snapshots` : `based on the last 24 h, mostly reconstructed from version release dates`;
+  $("#projNote").innerHTML = `How these are made: a straight-line pace of <b>${fmt1(pace*24)} downloads/day</b> (${useObs?"observed by the ravens":"last 24 h, mostly <i>reconstructed</i>; the watch has only "+fmt1(A.obsSpanH)+" h of real snapshots"}). The range runs from the lifetime average (${fmt1(A.rLife*24)}/day since the first release ${dayLbl.format(new Date(A.firstRel))}) to the slowest recent day. New mods usually spike at launch and then fade, so treat dates further out than a week as rough guesses. They firm up as history piles up${A.obsSpanH<48?" (after about 2 days of snapshots they'll mostly rest on real data)":""}.`;
+}
+function renderTavern(A){
+  const iss=(tav.issues||[]);
+  $("#tavern").innerHTML = `<span>⭐ <b>${fmt(tav.stars)}</b> stars</span><span>👁 <b>${fmt(tav.watchers)}</b> watchers</span><span>🍴 <b>${fmt(tav.forks)}</b> forks</span><span>📝 <b>${fmt(iss.filter(i=>!i.pr).length)}</b> issues</span><span>💬 <b>${fmt((tav.discussions||[]).length)}</b> discussions</span><span>🗨 <b>${fmt((tav.comments||0)+(tav.discussion_comments||0))}</b> comments</span><span>🧔 <b>${fmt((tav.folk||[]).length)}</b> outside folk</span><span>🎮 Discord <b>${fmt(disc.members)}</b> (${fmt(disc.online)} online)</span>`;
+  const st=(tav.stargazers||[]).map(s=>ts(s.at)).filter(Boolean).sort((a,b)=>a-b);
+  const start = ts(tav.created_at) || A.firstRel;
+  const items=[...iss.map(i=>ts(i.created)),...(tav.discussions||[]).map(d=>ts(d.created))].filter(Boolean).sort((a,b)=>a-b);
+  const mk=arr=>{ const p=[[start,0]]; arr.forEach((t,i)=>{ p.push([t,i]); p.push([t,i+1]); }); p.push([A.now,arr.length]); return p; };
+  lineChart($("#chartTavern"), [{pts:mk(st),color:"var(--gold2)",w:2.5},{pts:mk(items),color:"var(--tav)",w:2.5}], {h:150});
+  const folkHist=A.snaps.filter(s=>s.folk!=null);
+  $("#tavNote").innerHTML = `<span style="color:var(--gold2)">━</span> stars (from GitHub's starred_at) &nbsp; <span style="color:var(--tav)">━</span> issues + discussions opened. Tavern opened ${tav.created_at?when(tav.created_at):"–"}. ${disc.invite||disc.code?`Discord: <a href="${esc(disc.invite||("https://discord.gg/"+disc.code))}" target="_blank" rel="noopener">${esc(disc.server||"invite")}</a>.`:""} Outside visitors counts people other than hevyh2o who starred, watched or posted.`;
+}
+function renderFeed(freshIds){
+  const evs=[...store.events].sort((a,b)=>b.t-a.t).slice(0,150);
+  $("#feed").innerHTML = evs.length ? evs.map(e=>`<div class="ev${freshIds&&freshIds.has(e.id)?" fresh":""}"><div class="ic">${ICON[e.kind]||"🐦"}</div><div>${e.url?`<a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.text)}</a>`:esc(e.text)}<div class="tm">${when(e.t)}${e.src==="box"?" · ravens' box watch":""}</div></div></div>`).join("") : '<div class="note">No reports yet. The ravens will call out here.</div>';
+}
+function renderTimeline(){
+  const rows=[]; for (const p of Object.values(pk)) for (const v of (p.versions||[])) rows.push({t:ts(v.created), p, v});
+  rows.sort((a,b)=>b.t-a.t);
+  $("#timeline").innerHTML = rows.map(r=>`<div><b>${esc(pretty(r.p.name))}</b> v${esc(r.v.v)} · ${when(r.t)} · ${fmt(r.v.dl)} downloads</div>`).join("");
+}
+function renderStatus(){
+  const s=(k,label)=>{ const x=status[k]; const cls=x.state==="ok"?"ok":x.state==="warn"?"warn":x.state==="bad"?"bad":""; return `<span class="pill" title="${esc(x.msg||"")}"><span class="dot ${cls}"></span>${label}${x.at?" "+tfmt.format(new Date(x.at)):x.state==="busy"?" …":""}${x.msg?" ("+esc(x.msg)+")":""}</span>`; };
+  const quota = store.gh.remaining!=null ? ` · ${store.gh.remaining} left this hour` : "";
+  $("#statusbar").innerHTML = s("ts","Thunderstore") + s("gh","GitHub") + `<span class="pill">${quota?"GitHub quota"+quota:""}</span>` + s("dc","Discord") +
+    `<span class="pill">Box snapshot built ${D.built_at?when(D.built_at):"–"}</span><span class="pill">Polls every 5 min (15 min when hidden), GitHub every 15 min</span>`;
+}
+function renderFooter(A){
+  $("#footer").innerHTML = `<p>All times America/Chicago (CDT). Data: Thunderstore public API (per-package endpoint, CORS-enabled), GitHub REST (unauthenticated, ≤ 60/h per network), Discord public invite counts. History = ${fmt((D.snapshots||[]).length)} box snapshots + ${fmt(store.snapshots.length)} snapshots this browser saved. Download history before the watch began is reconstructed from each version's release date and download count, so it's an estimate.</p>`;
+}
+function renderAll(){
+  const A=analytics();
+  renderKPIs(A); renderTotalChart(A); renderRates(A); renderShare(A); renderTable(A); renderProjections(A); renderTavern(A); renderTimeline(); renderStatus(); renderFooter(A);
+}
+
+// ------------------------------------------------------------ wire up
+$("#btnSound").onclick=()=>{ ensureAudio(true); setTimeout(()=>{ updateSoundBtn(); play("dl"); },120); };
+$("#btnMute").onclick=()=>{ store.prefs.muted=!store.prefs.muted; save(); updateSoundBtn(); };
+$("#btnTest").onclick=()=>{ ensureAudio(true); const ks=["dl","like","tav","disc","ver"]; ks.forEach((k,i)=>setTimeout(()=>{ play(k); toast({kind:k,text:{dl:"Test: a download",like:"Test: a like",tav:"Test: tavern activity",disc:"Test: Discord",ver:"Test: new version"}[k]}); },i*1300)); };
+$("#btnRefresh").onclick=()=>{ pollThunderstore(); pollDiscord(); pollGitHub(store.gh.lastPoll && Date.now()-store.gh.lastPoll>3*60e3); };
+document.addEventListener("pointerdown",()=>{ if(!actx||actx.state!=="running") ensureAudio(true); }, {once:false, passive:true});
+// box events (from the monitor's change files) go into the feed silently
+pushEvents((D.events||[]).map(e=>Object.assign({},e,{t:ts(e.t),src:"box"})), {silent:true});
+ensureAudio(false); // in hosts that allow autoplay (the Hlidskjalf app) this is already running
+renderFeed(); renderAll();
+let rz; window.addEventListener("resize",()=>{ clearTimeout(rz); rz=setTimeout(renderAll,250); });
+window.__odinReady = true;
+pollThunderstore(); pollDiscord(); pollGitHub(false); schedule();
+})();
+</script>
+</body>
+</html>
